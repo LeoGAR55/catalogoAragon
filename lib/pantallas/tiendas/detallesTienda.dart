@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'tienda.dart';
+import '../../clases/tienda.dart';
 // clase para mostrar los detalles de una tienda al oprimirla en segunda pantalla
 class TiendaDetalleScreen extends StatelessWidget {
   final Tienda tienda; // tienda que vamos a mostrar

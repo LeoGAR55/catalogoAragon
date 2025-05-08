@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'tienda.dart';
+import '../clases/tienda.dart';
 // widget para mostrar la tienda como una tarjeta en segunda pantalla
 class TiendaCard extends StatelessWidget {
   final Tienda tienda;

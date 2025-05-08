@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'tienda.dart';
-import 'tienda_card.dart';
+import '../../clases/tienda.dart';
+import '../../widgets/tarjetaTienda.dart';
 import 'detallesTienda.dart';
 
 // widget para la segunda pantalla de la app (tiendas)

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:catalogo/pantallas/mapa.dart';  // Asegúrate de que FirstScreen esté correctamente definida
-import 'package:catalogo/pantallas/tiendas/segundaPantalla.dart';
-import 'package:catalogo/pantallas/buscar.dart';
+import 'package:catalogo/pantallas/pantallaMapa.dart';  // Asegúrate de que FirstScreen esté correctamente definida
+import 'package:catalogo/pantallas/tiendas/pantallaTienda.dart';
+import 'package:catalogo/pantallas/pantallaBuscar.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -13,7 +13,7 @@ class _MainScreenState extends State<MainScreen> { // widget main screen para na
   final List<Widget> _screens = [
     PrimerPantalla(),  // Asegúrate de que FirstScreen esté bien importada
     SegundaPantalla(), // Asegúrate de que SecondScreen esté bien importada
-    TerceraPantalla(),
+    PantallaBuscar(),
 
   ];
 
