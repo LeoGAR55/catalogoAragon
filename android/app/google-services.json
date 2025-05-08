@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "720601743004",
+    "project_id": "catalogoaragon",
+    "storage_bucket": "catalogoaragon.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:720601743004:android:ce35e7733a0bf5117cf759",
+        "android_client_info": {
+          "package_name": "com.example.catalogo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRZLK1Nu0cYPGdFmyZHmobPuJDAqS64lo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
