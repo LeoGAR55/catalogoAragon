@@ -20,7 +20,7 @@ class PantallaBuscar extends StatelessWidget {
         ],
       ),
       body: Center(
-        child: Text('Ingresa el producto a buscar'),
+        child: Text('Ingresa el  a buscar'),
       ),
     );
   }

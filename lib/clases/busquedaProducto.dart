@@ -108,11 +108,9 @@ class TiendaSearchDelegate extends SearchDelegate {
       },
     );
   }
-
   @override // si borro esta funcion se vuelve loco el ide
-  // al parecer esta clase abstracta requiere el metodo
+// al parecer esta clase abstracta requiere el metodo
   Widget buildSuggestions(BuildContext context) {
-    // TODO: implement buildSuggestions
-    throw UnimplementedError();
+    return Container(); // no hacemos nada aquí, solo devolvemos un widget vacío
   }
 }
