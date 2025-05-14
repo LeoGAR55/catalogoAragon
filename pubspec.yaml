@@ -34,6 +34,8 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  syncfusion_flutter_maps: ^29.1.38
+  #https://pub.dev/packages/syncfusion_flutter_maps/install
 
 dev_dependencies:
   flutter_test:
@@ -52,6 +54,9 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - lib/recursos/mapaAragon.png
+    #https://stackoverflow.com/questions/49757953/how-to-load-json-assets-into-a-flutter-app
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -88,4 +93,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
 

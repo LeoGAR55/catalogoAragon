@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// clase para mostrar los productos obtenidos en la busqueda
+// clase para almacenar y mostrar despues los productos obtenidos en la busqueda
 class ResultadoProducto {
   final String nombreProducto;
   final double precio;
@@ -20,8 +20,11 @@ class ResultadoProducto {
 // future builder es un widget que ejecuta una tarea asincrona, va a esperar un resultado y despues
 // lo va a mostrar
 
+//https://www.youtube.com/watch?v=S-8v9nOCUfw --Flutter Searching With Firebase Firestore | ListView Search
+
 // clase para manejar la busqueda de productos
-class TiendaSearchDelegate extends SearchDelegate {
+// https://api.flutter.dev/flutter/material/SearchDelegate-class.html
+class TiendaBuscar extends SearchDelegate {
   // funcion para buscar en firestone los productos
   Future<List<ResultadoProducto>> buscarProductos(String query) async {
     // traer todas las tiendas
@@ -109,8 +112,9 @@ class TiendaSearchDelegate extends SearchDelegate {
     );
   }
   @override // si borro esta funcion se vuelve loco el ide
-// al parecer esta clase abstracta requiere el metodo
+// al parecer esta clase abstracta requiere el metodo porque si no implosiona
   Widget buildSuggestions(BuildContext context) {
-    return Container(); // no hacemos nada aquí, solo devolvemos un widget vacío
+    return Container(); // no hacemos nada aqui, solo devolvemos un widget vacío
+    // aqui irian las sugerencias de busqueda si se implementara
   }
 }
