@@ -12,7 +12,7 @@ class PantallaBuscar extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.search), // lupa
             onPressed: () {
-              showSearch(
+              showSearch( // funcion que muestra la pantalla cuando oprimes el icon button de buscar
                 context: context,
                 delegate: TiendaBuscar(), // esta clase va a manejar la busqueda de productos
               );

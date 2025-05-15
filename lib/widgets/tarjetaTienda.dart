@@ -9,6 +9,9 @@ class TarjetaTienda extends StatelessWidget {
 
   const TarjetaTienda({required this.tienda, required this.onTap}); // constructor
 
+
+  // de este video viene la idea de meter el container dentro del gridview
+  // https://www.youtube.com/watch?v=7HpvSpyMqjI
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

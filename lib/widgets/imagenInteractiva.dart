@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../clases/tienda.dart';
 import 'dart:async';
+import 'package:vector_math/vector_math_64.dart' as vector_math;
 
 class ImagenInteractiva extends StatefulWidget {
   const ImagenInteractiva({super.key});
@@ -12,192 +13,166 @@ class ImagenInteractiva extends StatefulWidget {
 }
 
 class _ImagenInteractivaState extends State<ImagenInteractiva> {
-  final GlobalKey _imagenKey = GlobalKey(); // https://stackoverflow.com/questions/56895273/how-to-use-globalkey-to-maintain-widgets-states-when-changing-parents
-  List<Tienda> _tiendas = []; // todas las tiendas
-  // donde se va a dibujar cada iconbutton
+  List<Tienda> _tiendas = [];
+  final TransformationController _transformationController = TransformationController();
+
   final Map<String, Offset> _posiciones = {
-    'tienda_01': Offset(1187, 847),
-    'tienda_02': Offset(1187, 847), // frente al a3
-    'tienda_03': Offset(1222, 678),
-    'tienda_04': Offset(1222, 678),
-    'tienda_05': Offset(1222, 678),
-    'tienda_06': Offset(1222, 678), // atras del a2
-    'tienda_07': Offset(992, 622),
-    'tienda_08': Offset(992, 622), // entre el a4 y a5
-    'tienda_09': Offset(861, 511),
-    'tienda_10': Offset(861, 511), // al costado del l3
-    'tienda_11': Offset(1162, 535),
-    'tienda_12': Offset(1162, 535),
-    'tienda_13': Offset(1162, 535),
-    'tienda_14': Offset(1162, 535), // al frente del a5
-    'tienda_15': Offset(1112, 399),
-    'tienda_16': Offset(1112, 399), // enfrente del a12 y a6
-    'tienda_17': Offset(501, 394),
-    'tienda_18': Offset(501, 394), // al frente del gimnasio
-    'tienda_19': Offset(1002, 503), // colectivo en el a6
+    'tienda_01': Offset(0.61, 0.54),
+    'tienda_02': Offset(0.61, 0.54),
+    'tienda_03': Offset(0.63, 0.45),
+    'tienda_04': Offset(0.63, 0.45),
+    'tienda_05': Offset(0.63, 0.45),
+    'tienda_06': Offset(0.63, 0.45),
+    'tienda_07': Offset(0.51, 0.40),
+    'tienda_08': Offset(0.51, 0.40),
+    'tienda_09': Offset(0.45, 0.34),
+    'tienda_10': Offset(0.45, 0.34),
+    'tienda_11': Offset(0.59, 0.37),
+    'tienda_12': Offset(0.59, 0.37),
+    'tienda_13': Offset(0.59, 0.37),
+    'tienda_14': Offset(0.59, 0.37),
+    'tienda_15': Offset(0.59, 0.28),
+    'tienda_16': Offset(0.59, 0.28),
+    'tienda_17': Offset(0.26, 0.28),
+    'tienda_18': Offset(0.26, 0.28),
   };
 
-
-
   @override
-  void initState() { // cuando este widget se crea consultamos en firestore las tiendas
+  void initState() {
     super.initState();
-    _cargarTiendas(); // con este metodo realizamos la consulta
+    _cargarTiendas();
   }
 
-  // func asinc para cargar las tiendas desde firestone
   Future<void> _cargarTiendas() async {
-    final documentos = await FirebaseFirestore.instance.collection('tiendas').get(); // traer todos los documentos de tiendas
-    // https://stackoverflow.com/questions/46611369/get-all-from-a-firestore-collection-in-flutter
-    final tiendas = documentos.docs.map((doc) { // convertir documentos a objetos tienda
+    final documentos = await FirebaseFirestore.instance.collection('tiendas').get();
+    final tiendas = documentos.docs.map((doc) {
       final data = doc.data();
       final id = doc.id;
-      // obtenemos las coordenadas y si no hay les ponemos un valor default para que no explote la app
-      final x = (data['x'] ?? 0.0).toDouble();
-      final y = (data['y'] ?? 0.0).toDouble();
+      final posicion = _posiciones[id];
+      if (posicion == null) return null;
 
-      return Tienda( // por alguna razon si los documentos venian sin imagen url la app explotaba
-        id: id, // entonces hay que poner valores por default para evitar nulos
+      return Tienda(
+        id: id,
         nombre: data['nombre'] ?? 'Sin nombre',
         imagenUrl: data['imagenUrl'] ?? '',
-        x: x, // coord en pixeles de la clase tienda
-        y: y,
+        x: posicion.dx,
+        y: posicion.dy,
       );
-    }).toList();
+    }).whereType<Tienda>().toList();
 
-    setState(() { // volver a dibujar el widget con las nuevas tiendas cargadas
+    setState(() {
       _tiendas = tiendas;
     });
   }
 
-  // función para obtener el tamaño de la imagen
-  // sin la func las tiendas se dibujaban bien en la computadora pero en el celular se moviam
-  // porque las coordenadas no eran relativas
-  // la función puede ser asincrona porque el proceso de carga de la imagen en flutter es asincrono
-  // pero si sabemos el tamaño de la imagen podemos hardcodearlo y ya
-  Size _tamanioImagen(BoxConstraints constraints) {
-    const originalWidth = 2004.0;
-    const originalHeight = 1597.0;
+  Offset? _tapPosition;
 
-    // calculamos el ratio para escalar la imagen al ancho maximo permitido
-    final ratio = constraints.maxWidth / originalWidth;
-    double width = constraints.maxWidth;
-    double height = originalHeight * ratio;
-
-    // si la altura escalada es mayor al máximo permitido
-    // volvemos a calcular
-    if (height > constraints.maxHeight) {
-      final newRatio = constraints.maxHeight / originalHeight;
-      width = originalWidth * newRatio;
-      height = constraints.maxHeight;
-    }
-
-    return Size(width, height);
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
   }
 
-  // interfaz
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Center(
-        child: Container( // contenedor para hacer un borde alrededor del interactive viewer
-          decoration: BoxDecoration( // porque la imagen es una png y no s eveia bien
-            border: Border.all(color: Colors.grey, width: 2.0),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
+    return LayoutBuilder(builder: (context, constraints) {
+      return InteractiveViewer(
+        transformationController: _transformationController,
+        boundaryMargin: const EdgeInsets.all(50),
+        minScale: 0.85,
+        maxScale: 4.0,
+        child: GestureDetector(
+          onTapUp: (details) {
+            RenderBox box = context.findRenderObject() as RenderBox;
+            Offset localPosition = box.globalToLocal(details.globalPosition);
 
-              final imageSize = _tamanioImagen(constraints);
-              final extraX = (constraints.maxWidth - imageSize.width) / 2;
-              final extraY = (constraints.maxHeight - imageSize.height) / 2;
+            final Matrix4 matrix = _transformationController.value;
+            final Matrix4 inverseMatrix = Matrix4.inverted(matrix);
+            final vector_math.Vector3 vector3 = vector_math.Vector3(localPosition.dx, localPosition.dy, 0);
+            final vector_math.Vector3 untransformedVector = inverseMatrix.transform3(vector3);
+            final Offset untransformedPosition = Offset(untransformedVector.x, untransformedVector.y);
 
-              // AGRUPAR TIENDAS
-              // muchas tiendas estan muy juntas y se veia muy mal el mapa con tantos iconos
-              // entonces decidi agrupar las que tengan las mismas cordenadas
-              // y mostrar un menu para seleccionar la que quisieras
-              final Map<Offset, List<Tienda>> agrupadas = {};
-              for (var tienda in _tiendas) { // recorrer lista tiendas ya signar las cordenadas de posiciones
-                final key = _posiciones[tienda.id] ?? Offset(0, 0);
-                agrupadas.putIfAbsent(key, () => []).add(tienda);
-              }
-
-              return InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(50), // deslizazmiento fuera de la imagen en pixeles
-                minScale: 0.85,  // minimos y maximos del zoom a la img
-                maxScale: 4.0,
-                // widget para poder poner los iconbuttons encima de la imagen
-                // https://www.dhiwise.com/post/flutter-stack-your-ultimate-guide-to-overlapping-widgets
-                child: Stack(
-                  children: [
-                    // Mapa base
-                    Image.asset(
-                      'lib/recursos/mapaAragon.png',
-                      key: _imagenKey,
-                      fit: BoxFit.contain,
-                      width: constraints.maxWidth,
-                      height: constraints.maxHeight,
+            _handleTap(untransformedPosition, box.size);
+          },
+          child: AspectRatio(
+            aspectRatio: 2004 / 1597,
+            child: Stack(
+              children: [
+                // Fondo con borde negro
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 3),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-
-                     // dibujar iconbuttons con las posiciones d elos pixeles
-                    ...agrupadas.entries.map((entry) {
-                      // transformar coordenadas en pixeles al tamaño de la pantalla donde se este mostrando
-                      final left = entry.key.dx * (imageSize.width / 2004.0) + extraX;
-                      final top = entry.key.dy * (imageSize.height / 1597.0) + extraY;
-
-                      return Positioned(
-                        left: left,
-                        top: top,
-                        child: IconButton(
-                          padding: EdgeInsets.zero, // quitar el padding en los icon btn
-                          constraints: const BoxConstraints(),
-                          icon: Icon(
-                            // si hay mas de 1 icono en una posicion se usa el icono 1 y si solo hay 1 se usa el icono 2
-                            // esto solo sirve en el caso del colectivo :3
-                            entry.value.length > 1 ? Icons.storefront : Icons.store,
-                            color: Colors.redAccent,
-                            size: 12,
-                          ),
-                          onPressed: () {
-                            // al presionar un icono mostramos un showdialog con las tiendas
-                            // con coordenadas iguales (definidas en imginteractiva)
-                            showDialog(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                title: const Text('Tiendas en este edificio'),
-                                content: SizedBox(
-                                  width: double.maxFinite,
-                                  child: ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: entry.value.length,
-                                    itemBuilder: (context, index) {
-                                      final tienda = entry.value[index];
-                                      return ListTile(
-                                        title: Text(tienda.nombre),
-                                        leading: const Icon(Icons.store),
-                                        // cuando se escoge una tienda en show dialog
-                                        onTap: () {
-                                          Navigator.pop(context); // cerrar showdialog
-                                          Navigator.push( // ir a tiendadetalles
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => TiendaDetalle(tienda: tienda),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    }),
-                  ],
+                  ),
                 ),
+                // Imagen del mapa
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      'lib/recursos/mapaAragon.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+                // Íconos de tiendas
+                CustomPaint(
+                  painter: MapaPainter(tiendas: _tiendas),
+                  child: Container(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  void _handleTap(Offset localPosition, Size size) {
+    const tapRadius = 15.0;
+
+    final Map<Offset, List<Tienda>> agrupadas = {};
+
+    for (var tienda in _tiendas) {
+      final pos = Offset(tienda.x * size.width, tienda.y * size.height);
+      agrupadas.putIfAbsent(pos, () => []).add(tienda);
+    }
+
+    for (final entry in agrupadas.entries) {
+      final iconCenter = entry.key;
+      if ((localPosition - iconCenter).distance <= tapRadius) {
+        _mostrarTiendasEnDialogo(entry.value);
+        return;
+      }
+    }
+  }
+
+  void _mostrarTiendasEnDialogo(List<Tienda> tiendas) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Tiendas en este edificio'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: tiendas.length,
+            itemBuilder: (context, index) {
+              final tienda = tiendas[index];
+              return ListTile(
+                title: Text(tienda.nombre),
+                leading: const Icon(Icons.store),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TiendaDetalle(tienda: tienda),
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -206,3 +181,30 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
     );
   }
 }
+
+class MapaPainter extends CustomPainter {
+  final List<Tienda> tiendas;
+  final double iconSize = 20.0;
+
+  MapaPainter({required this.tiendas});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()..color = Colors.red;
+    final Map<Offset, List<Tienda>> agrupadas = {};
+
+    for (var tienda in tiendas) {
+      final pos = Offset(tienda.x * size.width, tienda.y * size.height);
+      agrupadas.putIfAbsent(pos, () => []).add(tienda);
+    }
+
+    for (final entry in agrupadas.entries) {
+      final offset = entry.key;
+      canvas.drawCircle(offset, iconSize / 2, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
