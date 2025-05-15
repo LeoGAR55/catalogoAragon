@@ -2,6 +2,7 @@ import 'package:catalogo/pantallas/tiendas/detallesTienda.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../clases/tienda.dart';
+import 'dart:async';
 
 class ImagenInteractiva extends StatefulWidget {
   const ImagenInteractiva({super.key});
@@ -11,9 +12,11 @@ class ImagenInteractiva extends StatefulWidget {
 }
 
 class _ImagenInteractivaState extends State<ImagenInteractiva> {
+  final GlobalKey _imagenKey = GlobalKey(); // https://stackoverflow.com/questions/56895273/how-to-use-globalkey-to-maintain-widgets-states-when-changing-parents
   List<Tienda> _tiendas = []; // todas las tiendas
 
-  final Map<String, Offset> _posiciones = { // donde se va a dibujar cada iconbutton
+  // donde se va a dibujar cada iconbutton
+  final Map<String, Offset> _posiciones = {
     'tienda_01': Offset(0.55, 0.47),
     'tienda_02': Offset(0.55, 0.47), // frente al a3
     'tienda_03': Offset(0.59, 0.41),
@@ -35,12 +38,13 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
     'tienda_19': Offset(0.494, 0.32), // colectivo en el a6
   };
 
-  @override // cuando este widget se crea consultamos en firestore las tiendas
-  void initState() {
+  @override
+  void initState() { // cuando este widget se crea consultamos en firestore las tiendas
     super.initState();
     _cargarTiendas(); // con este metodo realizamos la consulta
   }
 
+  // func asinc para cargar las tiendas desde firestone
   Future<void> _cargarTiendas() async {
     final documentos = await FirebaseFirestore.instance.collection('tiendas').get(); // traer todos los documentos de tiendas
     // https://stackoverflow.com/questions/46611369/get-all-from-a-firestore-collection-in-flutter
@@ -48,6 +52,7 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
       final data = doc.data();
       final id = doc.id;
       final posicion = _posiciones[id] ?? Offset(0.01, 0.01); // posiciones default
+
       return Tienda( // por alguna razon si los documentos venian sin imagen url la app explotaba
         id: id, // entonces hay que poner valores por default para evitar nulos
         nombre: data['nombre'] ?? 'Sin nombre',
@@ -61,6 +66,32 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
       _tiendas = tiendas;
     });
   }
+
+  // función para obtener el tamaño de la imagen
+  // sin la func las tiendas se dibujaban bien en la computadora pero en el celular se moviam
+  // porque las coordenadas no eran relativas
+  // la función puede ser asincrona porque el proceso de carga de la imagen en flutter es asincrono
+  // pero si sabemos el tamaño de la imagen podemos hardcodearlo y ya
+  Size _tamanioImagen(BoxConstraints constraints) {
+    const originalWidth = 2004.0;
+    const originalHeight = 1597.0;
+
+    // calculamos el ratio para escalar la imagen al ancho maximo permitido
+    final ratio = constraints.maxWidth / originalWidth;
+    double width = constraints.maxWidth;
+    double height = originalHeight * ratio;
+
+    // si la altura escalada es mayor al máximo permitido
+    // volvemos a calcular
+    if (height > constraints.maxHeight) {
+      final newRatio = constraints.maxHeight / originalHeight;
+      width = originalWidth * newRatio;
+      height = constraints.maxHeight;
+    }
+
+    return Size(width, height);
+  }
+
   // interfaz
   @override
   Widget build(BuildContext context) {
@@ -72,34 +103,45 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
             border: Border.all(color: Colors.grey, width: 2.0),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: InteractiveViewer(
-            boundaryMargin: const EdgeInsets.all(50), // deslizazmiento fuera de la imagen en pixeles
-            minScale: 0.85, // minimos y maximos del zoom a la img
-            maxScale: 4.0,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // AGRUPAR TIENDAS
-                // muchas tiendas estan muy juntas y se veia muy mal el mapa con tantos iconos
-                // entonces decidi agrupar las que tengan las mismas cordenadas
-                // y mostrar un menu para seleccionar la que quisieras
-                final Map<Offset, List<Tienda>> agrupadas = {};
-                for (var tienda in _tiendas) {
-                  final key = Offset(tienda.cordx, tienda.cordy);
-                  agrupadas.putIfAbsent(key, () => []).add(tienda);
-                }
-                  // widget para poder poner los iconbuttons encima de la imagen
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+
+              final imageSize = _tamanioImagen(constraints);
+              final extraX = (constraints.maxWidth - imageSize.width) / 2;
+              final extraY = (constraints.maxHeight - imageSize.height) / 2;
+
+              // AGRUPAR TIENDAS
+              // muchas tiendas estan muy juntas y se veia muy mal el mapa con tantos iconos
+              // entonces decidi agrupar las que tengan las mismas cordenadas
+              // y mostrar un menu para seleccionar la que quisieras
+              final Map<Offset, List<Tienda>> agrupadas = {};
+              for (var tienda in _tiendas) {
+                final key = Offset(tienda.cordx, tienda.cordy);
+                agrupadas.putIfAbsent(key, () => []).add(tienda);
+              }
+
+              return InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(50), // deslizazmiento fuera de la imagen en pixeles
+                minScale: 0.85,  // minimos y maximos del zoom a la img
+                maxScale: 4.0,
+                // widget para poder poner los iconbuttons encima de la imagen
                 // https://www.dhiwise.com/post/flutter-stack-your-ultimate-guide-to-overlapping-widgets
-                return Stack(
+                child: Stack(
                   children: [
-                    Image.asset( // traer la imagen
+                    // Mapa base
+                    Image.asset(
                       'lib/recursos/mapaAragon.png',
+                      key: _imagenKey,
                       fit: BoxFit.contain,
                       width: constraints.maxWidth,
                       height: constraints.maxHeight,
                     ),
-                    ...agrupadas.entries.map((entry) { // dibujar iconbuttons
-                      final left = entry.key.dx * constraints.maxWidth;
-                      final top = entry.key.dy * constraints.maxHeight;
+
+                    // // dibujar iconbuttons
+                    ...agrupadas.entries.map((entry) {
+                      final left = entry.key.dx * imageSize.width + extraX;
+                      final top = entry.key.dy * imageSize.height + extraY;
+
                       return Positioned(
                         left: left,
                         top: top,
@@ -149,9 +191,9 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
                       );
                     }),
                   ],
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),
