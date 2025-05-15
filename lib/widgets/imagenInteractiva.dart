@@ -17,25 +17,25 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
 
   // donde se va a dibujar cada iconbutton
   final Map<String, Offset> _posiciones = {
-    'tienda_01': Offset(0.55, 0.47),
-    'tienda_02': Offset(0.55, 0.47), // frente al a3
+    'tienda_01': Offset(0.568, 0.49),
+    'tienda_02': Offset(0.568, 0.49), // frente al a3
     'tienda_03': Offset(0.59, 0.41),
     'tienda_04': Offset(0.59, 0.41),
     'tienda_05': Offset(0.59, 0.41),
     'tienda_06': Offset(0.59, 0.41), // atras del a2
     'tienda_07': Offset(0.46, 0.36),
     'tienda_08': Offset(0.46, 0.36), // entre el a4 y a5
-    'tienda_09': Offset(0.4, 0.31),
-    'tienda_10': Offset(0.4, 0.31), // al costado del l3
-    'tienda_11': Offset(0.5, 0.23),
-    'tienda_12': Offset(0.5, 0.23),
-    'tienda_13': Offset(0.5, 0.23),
-    'tienda_14': Offset(0.5, 0.23), // al frente del a5
-    'tienda_15': Offset(0.56, 0.26),
-    'tienda_16': Offset(0.56, 0.26), // enfrente del a12 y a6
+    'tienda_09': Offset(0.4, 0.30),
+    'tienda_10': Offset(0.4, 0.30), // al costado del l3
+    'tienda_11': Offset(0.58, 0.315),
+    'tienda_12': Offset(0.58, 0.315),
+    'tienda_13': Offset(0.58, 0.315),
+    'tienda_14': Offset(0.58, 0.315), // al frente del a5
+    'tienda_15': Offset(0.555, 0.25),
+    'tienda_16': Offset(0.555, 0.25), // enfrente del a12 y a6
     'tienda_17': Offset(0.214, 0.247),
     'tienda_18': Offset(0.214, 0.247), // al frente del gimnasio
-    'tienda_19': Offset(0.494, 0.32), // colectivo en el a6
+    'tienda_19': Offset(0.5, 0.315), // colectivo en el a6
   };
 
   @override
@@ -151,7 +151,7 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
                             // esto solo sirve en el caso del colectivo :3
                             entry.value.length > 1 ? Icons.storefront : Icons.store,
                             color: Colors.redAccent,
-                            size: 24,
+                            size: 14,
                           ),
                           onPressed: () {
                             // al presionar un icono mostramos un showdialog con las tiendas
