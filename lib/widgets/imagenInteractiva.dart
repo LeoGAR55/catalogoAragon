@@ -24,12 +24,12 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
     'tienda_08': Offset(0.46, 0.36), // entre el a4 y a5
     'tienda_09': Offset(0.4, 0.31),
     'tienda_10': Offset(0.4, 0.31), // al costado del l3
-    'tienda_11': Offset(0.56, 0.32),
-    'tienda_12': Offset(0.56, 0.32),
-    'tienda_13': Offset(0.56, 0.32),
-    'tienda_14': Offset(0.56, 0.32,), // al frente del a5
-    'tienda_15': Offset(0.54, 0.275),
-    'tienda_16': Offset(0.54, 0.275), // enfrente del a12 y a6
+    'tienda_11': Offset(0.5, 0.23),
+    'tienda_12': Offset(0.5, 0.23),
+    'tienda_13': Offset(0.5, 0.23),
+    'tienda_14': Offset(0.5, 0.23), // al frente del a5
+    'tienda_15': Offset(0.56, 0.26),
+    'tienda_16': Offset(0.56, 0.26), // enfrente del a12 y a6
     'tienda_17': Offset(0.214, 0.247),
     'tienda_18': Offset(0.214, 0.247), // al frente del gimnasio
     'tienda_19': Offset(0.494, 0.32), // colectivo en el a6

@@ -52,10 +52,15 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+
+  flutter_launcher_icons: ^0.13.1
+
 # The following section is specific to Flutter packages.
 flutter:
   assets:
     - lib/recursos/mapaAragon.png
+    - lib/recursos/icono.png
+    - lib/recursos/iconoTrans.png
     #https://stackoverflow.com/questions/49757953/how-to-load-json-assets-into-a-flutter-app
 
   # The following line ensures that the Material Icons font is
@@ -94,4 +99,7 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
-
+flutter_launcher_icons:
+  android: true
+  ios: true # (ponlo en true si también quieres cambiar ícono en iOS)
+  image_path: "lib/recursos/icono.png" # Ruta de tu ícono

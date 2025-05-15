@@ -9,6 +9,13 @@ class PantallaMapa extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Mapa de las tiendas en la FES Aragón"),
       backgroundColor: Color.fromARGB(255, 234, 210, 250),
+        actions: [ // widget para mostrar el icono transparente a la derecha de la appbar
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Image.asset('lib/recursos/iconoTrans.png'),
+          ),
+        ],
+
       ),
       body: Padding(
         padding: EdgeInsets.all(8.0),

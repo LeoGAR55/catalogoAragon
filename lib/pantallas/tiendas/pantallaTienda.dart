@@ -50,6 +50,12 @@ class _PantallaTiendaState extends State<PantallaTienda> {
       appBar: AppBar(
         title: Text(widget.nombreTienda ?? 'Tiendas'), // barra superior, mostrar nombre si viene del mapa
         backgroundColor: Color.fromARGB(255, 234, 210, 250),
+        actions: [ // widget para mostrar el icono transparente a la derecha de la appbar
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Image.asset('lib/recursos/iconoTrans.png'),
+          ),
+        ],
       ),
       body: FutureBuilder<List<Tienda>>( // widget para definir que se va a mostrar mientras no se haya obtenido los datos
         // y que se va a mostrar cuando ya se obtengan
