@@ -14,29 +14,30 @@ class ImagenInteractiva extends StatefulWidget {
 class _ImagenInteractivaState extends State<ImagenInteractiva> {
   final GlobalKey _imagenKey = GlobalKey(); // https://stackoverflow.com/questions/56895273/how-to-use-globalkey-to-maintain-widgets-states-when-changing-parents
   List<Tienda> _tiendas = []; // todas las tiendas
-
   // donde se va a dibujar cada iconbutton
   final Map<String, Offset> _posiciones = {
-    'tienda_01': Offset(0.568, 0.49),
-    'tienda_02': Offset(0.568, 0.49), // frente al a3
-    'tienda_03': Offset(0.59, 0.41),
-    'tienda_04': Offset(0.59, 0.41),
-    'tienda_05': Offset(0.59, 0.41),
-    'tienda_06': Offset(0.59, 0.41), // atras del a2
-    'tienda_07': Offset(0.46, 0.36),
-    'tienda_08': Offset(0.46, 0.36), // entre el a4 y a5
-    'tienda_09': Offset(0.4, 0.30),
-    'tienda_10': Offset(0.4, 0.30), // al costado del l3
-    'tienda_11': Offset(0.58, 0.315),
-    'tienda_12': Offset(0.58, 0.315),
-    'tienda_13': Offset(0.58, 0.315),
-    'tienda_14': Offset(0.58, 0.315), // al frente del a5
-    'tienda_15': Offset(0.555, 0.25),
-    'tienda_16': Offset(0.555, 0.25), // enfrente del a12 y a6
-    'tienda_17': Offset(0.214, 0.247),
-    'tienda_18': Offset(0.214, 0.247), // al frente del gimnasio
-    'tienda_19': Offset(0.5, 0.315), // colectivo en el a6
+    'tienda_01': Offset(1187, 847),
+    'tienda_02': Offset(1187, 847), // frente al a3
+    'tienda_03': Offset(1222, 678),
+    'tienda_04': Offset(1222, 678),
+    'tienda_05': Offset(1222, 678),
+    'tienda_06': Offset(1222, 678), // atras del a2
+    'tienda_07': Offset(992, 622),
+    'tienda_08': Offset(992, 622), // entre el a4 y a5
+    'tienda_09': Offset(861, 511),
+    'tienda_10': Offset(861, 511), // al costado del l3
+    'tienda_11': Offset(1162, 535),
+    'tienda_12': Offset(1162, 535),
+    'tienda_13': Offset(1162, 535),
+    'tienda_14': Offset(1162, 535), // al frente del a5
+    'tienda_15': Offset(1112, 399),
+    'tienda_16': Offset(1112, 399), // enfrente del a12 y a6
+    'tienda_17': Offset(501, 394),
+    'tienda_18': Offset(501, 394), // al frente del gimnasio
+    'tienda_19': Offset(1002, 503), // colectivo en el a6
   };
+
+
 
   @override
   void initState() { // cuando este widget se crea consultamos en firestore las tiendas
@@ -51,14 +52,16 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
     final tiendas = documentos.docs.map((doc) { // convertir documentos a objetos tienda
       final data = doc.data();
       final id = doc.id;
-      final posicion = _posiciones[id] ?? Offset(0.01, 0.01); // posiciones default
+      // obtenemos las coordenadas y si no hay les ponemos un valor default para que no explote la app
+      final x = (data['x'] ?? 0.0).toDouble();
+      final y = (data['y'] ?? 0.0).toDouble();
 
       return Tienda( // por alguna razon si los documentos venian sin imagen url la app explotaba
         id: id, // entonces hay que poner valores por default para evitar nulos
         nombre: data['nombre'] ?? 'Sin nombre',
         imagenUrl: data['imagenUrl'] ?? '',
-        cordx: posicion.dx,
-        cordy: posicion.dy,
+        x: x, // coord en pixeles de la clase tienda
+        y: y,
       );
     }).toList();
 
@@ -115,8 +118,8 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
               // entonces decidi agrupar las que tengan las mismas cordenadas
               // y mostrar un menu para seleccionar la que quisieras
               final Map<Offset, List<Tienda>> agrupadas = {};
-              for (var tienda in _tiendas) {
-                final key = Offset(tienda.cordx, tienda.cordy);
+              for (var tienda in _tiendas) { // recorrer lista tiendas ya signar las cordenadas de posiciones
+                final key = _posiciones[tienda.id] ?? Offset(0, 0);
                 agrupadas.putIfAbsent(key, () => []).add(tienda);
               }
 
@@ -137,21 +140,24 @@ class _ImagenInteractivaState extends State<ImagenInteractiva> {
                       height: constraints.maxHeight,
                     ),
 
-                    // // dibujar iconbuttons
+                     // dibujar iconbuttons con las posiciones d elos pixeles
                     ...agrupadas.entries.map((entry) {
-                      final left = entry.key.dx * imageSize.width + extraX;
-                      final top = entry.key.dy * imageSize.height + extraY;
+                      // transformar coordenadas en pixeles al tamaño de la pantalla donde se este mostrando
+                      final left = entry.key.dx * (imageSize.width / 2004.0) + extraX;
+                      final top = entry.key.dy * (imageSize.height / 1597.0) + extraY;
 
                       return Positioned(
                         left: left,
                         top: top,
                         child: IconButton(
+                          padding: EdgeInsets.zero, // quitar el padding en los icon btn
+                          constraints: const BoxConstraints(),
                           icon: Icon(
                             // si hay mas de 1 icono en una posicion se usa el icono 1 y si solo hay 1 se usa el icono 2
                             // esto solo sirve en el caso del colectivo :3
                             entry.value.length > 1 ? Icons.storefront : Icons.store,
                             color: Colors.redAccent,
-                            size: 14,
+                            size: 12,
                           ),
                           onPressed: () {
                             // al presionar un icono mostramos un showdialog con las tiendas

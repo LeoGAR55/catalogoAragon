@@ -1,5 +1,3 @@
-import 'dart:ui'; // para trabajar con Offset
-
 // clase que representa un producto con los campos nombre y precio
 class Producto {
   final String nombre;
@@ -20,21 +18,21 @@ class Producto {
   }
 }
 
-// clase tienda n
+// clase tienda
 class Tienda {
-  final String id; //estos 3 primeros atributos vienen de Firestore
+  final String id; // estos 3 primeros atributos vienen de Firestore
   final String nombre;
   final String imagenUrl;
-  final double cordx; // estas 2 coordenadas indican la posicion de la tienda en el widget de imagenInteractiva
-  final double cordy;
+  final double x; // coordenada horizontal en píxeles relativos a la imagen original
+  final double y; // coordenada vertical en píxeles relativos a la imagen original
 
   // constructor de la tienda con todos los campos
   Tienda({
     required this.id,
     required this.nombre,
     required this.imagenUrl,
-    this.cordx = 0,
-    this.cordy = 0,
+    this.x = 0,
+    this.y = 0,
   });
 
   // metodo para crear la tienda a partir del map de Firestore
@@ -60,19 +58,20 @@ class Tienda {
   }
 
   // para trabajar en imagen interactiva
-  // la tienda de la imagen vien con la pos x y y
-  factory Tienda.conPosicion({
+  // la tienda de la imagen viene con la pos x,y en píxeles
+  factory Tienda.conCoordenadas({
     required String id,
     required String nombre,
     required String imagenUrl,
-    required Offset posicion,
+    required double x,
+    required double y,
   }) {
     return Tienda(
       id: id,
       nombre: nombre,
       imagenUrl: imagenUrl,
-      cordx: posicion.dx,
-      cordy: posicion.dy,
+      x: x,
+      y: y,
     );
   }
 }
