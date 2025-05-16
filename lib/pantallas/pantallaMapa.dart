@@ -20,6 +20,7 @@ class PantallaMapa extends StatelessWidget {
       body: Padding(
         padding: EdgeInsets.all(8.0),
         child: ImagenInteractiva(), // widget personalizado del mapa
+
       ),
     );
   }

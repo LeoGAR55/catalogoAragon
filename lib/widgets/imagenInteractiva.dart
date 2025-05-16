@@ -234,7 +234,13 @@ class MapaPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()..color = Colors.red;
+    final Paint paint = Paint()..color = Colors.red // color a llenar el circ
+      ..style = PaintingStyle.fill;
+    final Paint borderPaint = Paint() // borde alrededor del circ
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
     final Map<Offset, List<Tienda>> agrupadas = {}; // jalar las tiendas agrupadas para no pitar 2 veces el circulo
                                                     // ya me paso
     for (var tienda in tiendas) { // convertir offset a pixeles
@@ -244,7 +250,27 @@ class MapaPainter extends CustomPainter {
 
     for (final entry in agrupadas.entries) { // dibujar el circulo rojo para cada agrupada (grupo de tienditas)
       final offset = entry.key;
-      canvas.drawCircle(offset, iconSize / 2, paint);
+      canvas.drawCircle(offset, iconSize / 2, paint);   // circ
+      canvas.drawCircle(offset, iconSize / 2, borderPaint); // margen
+
+      if (entry.value.length > 1) { // si hay mas de una tienda
+        final textPainter = TextPainter( // dibujar con un text painter
+          text: TextSpan(
+            text: entry.value.length.toString(), // el numero de tiendas agrupadas
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: iconSize * 0.8,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        );
+        textPainter.layout();
+        textPainter.paint( // dib texto
+          canvas,
+          offset - Offset(textPainter.width / 2, textPainter.height / 2), // centrar el texto a dib
+        );
+      }
     }
   }
 
