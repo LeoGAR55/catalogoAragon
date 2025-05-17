@@ -41,7 +41,6 @@ class Tienda {
   // y si no tiramos un error
   factory Tienda.fromMap(String id, Map<String, dynamic> data) {
     try {
-      // Asegúrate de que los valores no sean null antes de usarlos
       final nombre = data['nombre'] ?? 'Nombre no disponible';  // nombre por defecto si no existe
       final imagenUrl = data['imagenUrl'] ?? '';  // imagen vacía si no existe el campo
 
@@ -52,7 +51,7 @@ class Tienda {
       );
     } catch (e) {
       // si hay un error:
-      print("Error al crear tienda desde Firestore: $e");
+      print("error en: $e");
       rethrow;
     }
   }
